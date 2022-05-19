@@ -1,0 +1,19 @@
+﻿@model List<OrderItem>
+
+@{
+    ViewData["Title"] = "Корзина";
+}
+
+@foreach (var orderItem in Model)
+{
+    <div class="card product">
+        <div class="card-body">
+            <h5 class="product-name card-title">@orderItem.Product.Name</h5>
+            <h6 class="product-price card-subtitle mb-2 text-muted">@orderItem.Price</h6>
+            <div class="product-count">@orderItem.Quanity</div>
+           
+        </div>
+    </div>
+}
+
+
