@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace asp_online_shop.Models
 {
@@ -20,5 +20,7 @@ namespace asp_online_shop.Models
         public int Count { get; set; }
 
         public string Description { get; set; }
+
+        //public virtual List<OrderItem> OrderItems { get; set; }
     }
 }

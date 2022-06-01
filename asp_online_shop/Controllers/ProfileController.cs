@@ -1,8 +1,11 @@
 ﻿using asp_online_shop.Areas.Identity.Data;
+using asp_online_shop.Models;
+using asp_online_shop.Repositories;
 using asp_online_shop.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -12,19 +15,22 @@ namespace asp_online_shop.Controllers
    [Authorize]
     public class ProfileController : Controller
     {
-        private UserManager<User> _userManager;
+        private readonly UserManager<User> _userManager;
+        private readonly IOrderRepo _orderRepo;
 
-        
-        public ProfileController(UserManager<User> userManager)
+
+        public ProfileController(UserManager<User> userManager, IOrderRepo orderRepo)
         {
             _userManager = userManager;
+            _orderRepo = orderRepo;
         }
 
         public async Task<ActionResult> OrdersAsync()
         {       
-            var user = await _userManager.FindByIdAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            return View(user.Orders);
+            var orders = await _orderRepo.GetByUserId(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            return View(orders ?? new List<Order>());
         }
+
 
         [HttpGet]
         public async Task<ActionResult> Edit()
@@ -40,7 +46,7 @@ namespace asp_online_shop.Controllers
                 Address = user.Address,
                 Email = user.Email,
                 Phone = user.Phone,
-            };
+            };        
             return View(model);
         }
 
@@ -48,23 +54,32 @@ namespace asp_online_shop.Controllers
         public async Task<ActionResult> Edit(CustomerEditViewModel model)
         {
             if(ModelState.IsValid)
-            {  
-                var user = new User
+            {
+                var user = await _userManager.FindByIdAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                user.Firstname = model.Firstname;
+                user.Surname = model.Surname;
+                user.Patronymic = model.Patronymic;
+                user.Dob = model.Dob;
+                user.Gender = model.Gender;
+                user.Address = model.Address;
+                user.Email = model.Email;
+                user.Phone = model.Phone;            
+                await _userManager.UpdateAsync(user);
+
+                var claims = new List<Claim>
                 {
-                    Id = User.FindFirstValue(ClaimTypes.NameIdentifier),
-                    Firstname = model.Firstname,
-                    Surname = model.Surname,
-                    Patronymic = model.Patronymic,
-                    Dob = model.Dob,
-                    Gender = model.Gender,
-                    Address = model.Address,
-                    Email = model.Email,
-                    Phone = model.Phone,
+                    new Claim("Firstname", user.Firstname),
+                    new Claim("Surname", user.Surname),
+                    new Claim("Patronymic", user.Patronymic ?? ""),
+                    new Claim("Phone", user.Phone),
+                    new Claim("Address", user.Address ?? ""),
                 };
-                await _userManager.UpdateAsync(user);               
+                await _userManager.RemoveClaimsAsync(user, await _userManager.GetClaimsAsync(user));
+                await _userManager.AddClaimsAsync(user, claims);
             }
             return View(model);
         }
+        
 
         
         public async Task<ActionResult> Delete()

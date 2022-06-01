@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 
 namespace asp_online_shop.Areas.Identity.Pages.Account
 {
@@ -24,17 +25,20 @@ namespace asp_online_shop.Areas.Identity.Pages.Account
         private readonly UserManager<User> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public RegisterModel(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _roleManager = roleManager;
         }
 
         [BindProperty]
@@ -110,10 +114,26 @@ namespace asp_online_shop.Areas.Identity.Pages.Account
                     Phone = Input.Phone,
                     Email = Input.Email,
                 };
-                var result = await _userManager.CreateAsync(user, Input.Password);
+                var claims = new List<Claim>
+                {
+                    new Claim("Firstname", user.Firstname),
+                    new Claim("Surname", user.Surname),
+                    new Claim("Patronymic", user.Patronymic ?? ""),
+                    new Claim("Phone", user.Phone),
+                    new Claim("Address", user.Address ?? ""),
+                };
+                var result = await _userManager.CreateAsync(user, Input.Password); 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    await _userManager.AddClaimsAsync(user, claims);
+
+                    var defaultrole = _roleManager.FindByNameAsync("User").Result;
+                    if (defaultrole != null)
+                    {
+                        _ = await _userManager.AddToRoleAsync(user, defaultrole.Name);
+                    }
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

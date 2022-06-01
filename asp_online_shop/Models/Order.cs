@@ -1,6 +1,7 @@
-﻿using System;
+﻿using asp_online_shop.Areas.Identity.Data;
+using System;
 using System.Collections.Generic;
-
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace asp_online_shop.Models
 {
@@ -8,7 +9,7 @@ namespace asp_online_shop.Models
 	{
 		public int Id { get; set; }
 
-		public string UserId { get; set; }
+		public virtual string UserId { get; set; }
 
 		public string OrderStatus { get; set; }
 
@@ -16,7 +17,7 @@ namespace asp_online_shop.Models
 
 		public DateTime? ShippedDate { get; set; }
 
-		public List<OrderItem> OrderItems { get; set; }
+		public ICollection<OrderItem> OrderItems { get; set; }
 
 		public string Address { get; set; }
 
@@ -25,5 +26,6 @@ namespace asp_online_shop.Models
 		public PaymentMethod PaymentMethod { get; set; }
 
 		public DeliveryMethod DeliveryMethod { get; set; }
+		public User User { get; set; }
 	}
 }

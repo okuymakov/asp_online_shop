@@ -41,8 +41,5 @@ namespace asp_online_shop.Areas.Identity.Data
         [Column(TypeName = "nvarchar(50)")]
         [Required]
         public string Phone { get; set; }
-
-        public List<Order> Orders { get; set; } = new List<Order>();
-
     }
 }

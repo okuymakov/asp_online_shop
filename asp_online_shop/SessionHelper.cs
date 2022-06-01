@@ -11,13 +11,14 @@ namespace asp_online_shop
     {
         public static void SetObjectAsJson(this ISession session, string key, object value)
         {
-            session.SetString(key, JsonConvert.SerializeObject(value));
+            var v = JsonConvert.SerializeObject(value);
+            session.SetString(key, v);
         }
 
         public static T GetObjectFromJson<T>(this ISession session, string key)
         {
             var value = session.GetString(key);
-            return value == null ? default(T) : JsonConvert.DeserializeObject<T>(value);
+            return value == null ? default : JsonConvert.DeserializeObject<T>(value);
         }
     }
 }

@@ -4,7 +4,6 @@ using asp_online_shop.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -14,24 +13,27 @@ namespace asp_online_shop.Controllers
     [Authorize]
     public class OrderController : Controller
     {
-        private IOrderRepo _repo;
+        private readonly IOrderRepo _repo;
 
         public OrderController(IOrderRepo repo)
         {
             _repo = repo;
         }
 
+        [HttpGet]
         public ActionResult Index()
         {
-            return Json(5);
+            return View();
         }
-        public async Task<JsonResult> Create(OrderViewModel model)
+
+        [HttpPost]
+        public async Task<ActionResult> Index(OrderViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var busket = HttpContext.Session.GetObjectFromJson<Busket>("busket");
+                var cart = HttpContext.Session.GetObjectFromJson<Cart>("cart");
 
-                List<OrderItem> orderItems = busket.Items;
+                List<OrderItem> orderItems = cart.Items;
 
                 var order = new Order
                 {
@@ -45,13 +47,23 @@ namespace asp_online_shop.Controllers
                     DeliveryMethod = model.DeliveryMethod,
                     PaymentMethod = model.PaymentMethod,
                 };
-
                 await _repo.Create(order);
-                return Json(true);
+
+                cart.Clear();
+                HttpContext.Session.SetObjectAsJson("cart", cart);
+                return RedirectToAction("index", "cart");
             }
-            return Json(false);
+            return View(model);
         }
 
+        [HttpDelete]
+        public async Task<JsonResult> Cancel([FromBody] int id)
+        {
+            await _repo.Delete(id);
+            return Json(true);
+        }
+
+        [HttpPost]
         public async Task<JsonResult> GetAll()
         {
             return Json(await _repo.GetAll());

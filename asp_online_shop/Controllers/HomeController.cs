@@ -1,20 +1,20 @@
-﻿using asp_online_shop.Models;
+﻿using asp_online_shop.Areas.Identity.Data;
 using asp_online_shop.Repositories;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace asp_online_shop.Controllers
 {
     public class HomeController : Controller
     {
-        private IProductRepo _repo;
+        private readonly IProductRepo _repo;
+        private readonly SignInManager<User> _signInManager;
 
-        public HomeController(IProductRepo repo)
+        public HomeController(IProductRepo repo,  SignInManager<User> signInManager)
         {
             _repo = repo;
+            _signInManager = signInManager;
         }
 
         public async Task<ActionResult> Index()
@@ -23,32 +23,10 @@ namespace asp_online_shop.Controllers
             return View(products);
         }
 
-
-        public ActionResult Cart()
+        public async Task<ActionResult> Logout()
         {
-            var settings = new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                MissingMemberHandling = MissingMemberHandling.Ignore
-            };
-            var busket = HttpContext.Session.GetObjectFromJson<Busket>("busket") ?? new Busket();
-            return View(busket.Items);
-        }
-
-        public async  Task AddToCart(int productId)
-        {
-            var product = await _repo.Get(productId);
-            if(product.Count > 0)
-            {
-                var busket = HttpContext.Session.GetObjectFromJson<Busket>("busket");
-                if(busket == null)
-                {
-                    busket = new Busket();
-                    HttpContext.Session.SetObjectAsJson("busket", busket);
-                }
-                busket.AddProduct(product);
-                HttpContext.Session.SetObjectAsJson("busket", busket);
-            }
+            await _signInManager.SignOutAsync();
+            return RedirectToPage("/Account/Login", new { area = "Identity" });
         }
     }
 }

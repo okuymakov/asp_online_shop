@@ -11,24 +11,28 @@
             <form>
                 <h5 class="product-name card-title">@product.Name</h5>
                 <h6 class="product-price card-subtitle mb-2 text-muted">@product.Price</h6>
-                <button class="btn btn-primary" data-id="@product.Id" asp-action="addToCart">Добавить в корзину</button>
+                @if (product.Count == 0)
+                {
+                    <button class="btn btn-primary cart-add-btn" disabled data-id="@product.Id">Товар закончился</button>
+                }
+                else
+                {
+                    <button class="btn btn-primary cart-add-btn" data-id="@product.Id">Добавить в корзину</button>
+                }
             </form>
-            @*<button class="btn btn-primary" data-toggle="modal" data-target="#orderModal" data-id="@product.Id">Заказать</button>*@
         </div>
     </div>
 }
 
+@if (User.Identity.IsAuthenticated)
+{
 <div>
-    <a asp-action="Logout">Выйти</a>
+    <a asp-action="logout">Выйти</a>
 </div>
-
-@*<div class="modal fade" id="orderModal" tabindex="-1" role="dialog" aria-labelledby="orderModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            @await Html.PartialAsync("Order", new OrderViewModel { });
-        </div>
-    </div>
-</div>*@
+}
+<div id="alert" class="alert alert-dark fixed-top" role="alert">
+    <div class="text-center">Невозможно добавить в корзину больше, чем имеется на складе!</div>
+</div>
 
 
 @section Scripts {

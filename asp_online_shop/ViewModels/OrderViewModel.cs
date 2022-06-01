@@ -4,24 +4,20 @@ namespace asp_online_shop.ViewModels
 {
     public class OrderViewModel
     {
-        [Required]
-        public int ProductId { get; set; }
-        [Required]
-        public int UserId { get; set; }
 
         [Required]
-        public string CustomerName { get; set; }
+        public string UserName { get; set; }
 
         [Required]
-        public string CustomerSurname { get; set; }
+        public string UserSurname { get; set; }
 
-        public string CustomerPatronymic { get; set; }
-
-        [Required]
-        public string CustomerPhone { get; set; }
+        public string UserPatronymic { get; set; }
 
         [Required]
-        public string CustomerEmail { get; set; }
+        public string UserPhone { get; set; }
+
+        [Required]
+        public string UserEmail { get; set; }
 
         [Required]
         public string Address { get; set; }
